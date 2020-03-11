@@ -63,6 +63,15 @@ const makeDoneHandlers = (callback, content, rest) => ({
   success: () => callback(null, content, ...rest)
 });
 
+const canUsePrettier = () => {
+  try {
+    require.resolve("prettier");
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
 const applyPrettier = async input => {
   const prettier = require("prettier");
 
@@ -107,7 +116,9 @@ module.exports = async function(content, ...rest) {
     cssModuleKeys
   )}\n${cssModuleExport}`;
 
-  const cssModuleDefinition = await applyPrettier(cssModule);
+  const cssModuleDefinition = canUsePrettier()
+    ? await applyPrettier(cssModule)
+    : cssModule;
 
   if (mode === "verify") {
     read((err, fileContents) => {
